@@ -3,6 +3,9 @@
 module.exports = SortedArray;
 
 var Shim = require("./shim");
+var ShimObject = require("./shim-object");
+var ShimFunction = require("./shim-function");
+var ShimArray = require("./shim-array");
 var GenericCollection = require("./generic-collection");
 var PropertyChanges = require("./listen/property-changes");
 var RangeChanges = require("./listen/range-changes");
@@ -12,14 +15,14 @@ function SortedArray(values, equals, compare, getDefault) {
         return new SortedArray(values, equals, compare, getDefault);
     }
     if (Array.isArray(values)) {
-        this.array = values;
+        this.array = ShimArray.shim(values);
         values = values.splice(0, values.length);
     } else {
-        this.array = [];
+        this.array = new ShimArray();
     }
-    this.contentEquals = equals || Object.equals;
-    this.contentCompare = compare || Object.compare;
-    this.getDefault = getDefault || Function.noop;
+    this.contentEquals = equals || ShimObject.equals;
+    this.contentCompare = compare || ShimObject.compare;
+    this.getDefault = getDefault || ShimFunction.noop;
 
     this.length = 0;
     this.addEach(values);
@@ -28,9 +31,9 @@ function SortedArray(values, equals, compare, getDefault) {
 // hack so require("sorted-array").SortedArray will work in MontageJS
 SortedArray.SortedArray = SortedArray;
 
-Object.addEach(SortedArray.prototype, GenericCollection.prototype);
-Object.addEach(SortedArray.prototype, PropertyChanges.prototype);
-Object.addEach(SortedArray.prototype, RangeChanges.prototype);
+ShimObject.addEach(SortedArray.prototype, GenericCollection.prototype);
+ShimObject.addEach(SortedArray.prototype, PropertyChanges.prototype);
+ShimObject.addEach(SortedArray.prototype, RangeChanges.prototype);
 
 SortedArray.prototype.isSorted = true;
 
@@ -329,4 +332,4 @@ SortedArray.prototype.toJSON = function () {
     return this.toArray();
 };
 
-SortedArray.prototype.Iterator = Array.prototype.Iterator;
+SortedArray.prototype.Iterator = ShimArray.prototype.Iterator;

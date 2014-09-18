@@ -1,6 +1,8 @@
 "use strict";
 
 var Shim = require("./shim");
+var ShimObject = require("./shim-object");
+var ShimFunction = require("./shim-function");
 var List = require("./list");
 var FastSet = require("./fast-set");
 var GenericCollection = require("./generic-collection");
@@ -14,9 +16,9 @@ function Set(values, equals, hash, getDefault) {
     if (!(this instanceof Set)) {
         return new Set(values, equals, hash, getDefault);
     }
-    equals = equals || Object.equals;
-    hash = hash || Object.hash;
-    getDefault = getDefault || Function.noop;
+    equals = equals || ShimObject.equals;
+    hash = hash || ShimObject.hash;
+    getDefault = getDefault || ShimFunction.noop;
     this.contentEquals = equals;
     this.contentHash = hash;
     this.getDefault = getDefault;
@@ -40,10 +42,10 @@ function Set(values, equals, hash, getDefault) {
 
 Set.Set = Set; // hack so require("set").Set will work in MontageJS
 
-Object.addEach(Set.prototype, GenericCollection.prototype);
-Object.addEach(Set.prototype, GenericSet.prototype);
-Object.addEach(Set.prototype, PropertyChanges.prototype);
-Object.addEach(Set.prototype, RangeChanges.prototype);
+ShimObject.addEach(Set.prototype, GenericCollection.prototype);
+ShimObject.addEach(Set.prototype, GenericSet.prototype);
+ShimObject.addEach(Set.prototype, PropertyChanges.prototype);
+ShimObject.addEach(Set.prototype, RangeChanges.prototype);
 
 Set.prototype.Order = List;
 Set.prototype.Store = FastSet;

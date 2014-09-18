@@ -2,7 +2,8 @@
 
 module.exports = Iterator;
 
-var Object = require("./shim-object");
+var ShimObject = require("./shim-object");
+var ShimArray = require("./shim-array");
 var GenericCollection = require("./generic-collection");
 
 // upgrades an iterable to a Iterator
@@ -60,7 +61,7 @@ Iterator.prototype.iterator = GenericCollection.prototype.iterator;
 // this is a bit of a cheat so flatten and such work with the generic
 // reducible
 Iterator.prototype.constructClone = function (values) {
-    var clone = [];
+    var clone = new ShimArray();
     clone.addEach(values);
     return clone;
 };

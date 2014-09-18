@@ -1,5 +1,12 @@
 
-var Object = require("./shim-object");
+var circularDeps = require("./circular-dependency-helper");
+
+var ShimObject = require("./shim-object");
+
+circularDeps.getIfCircular(ShimObject, function(e) {
+    ShimObject = e;
+});
+
 
 module.exports = GenericOrder;
 function GenericOrder() {
@@ -7,7 +14,7 @@ function GenericOrder() {
 }
 
 GenericOrder.prototype.equals = function (that, equals) {
-    equals = equals || this.contentEquals || Object.equals;
+    equals = equals || this.contentEquals || ShimObject.equals;
 
     if (this === that) {
         return true;
@@ -26,7 +33,7 @@ GenericOrder.prototype.equals = function (that, equals) {
 };
 
 GenericOrder.prototype.compare = function (that, compare) {
-    compare = compare || this.contentCompare || Object.compare;
+    compare = compare || this.contentCompare || ShimObject.compare;
 
     if (this === that) {
         return 0;

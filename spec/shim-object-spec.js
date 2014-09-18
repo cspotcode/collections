@@ -8,6 +8,7 @@
 */
 
 require("../shim");
+var ShimObject = require("../shim-object");
 var Dict = require("../dict");
 
 describe("Object", function () {
@@ -19,19 +20,19 @@ describe("Object", function () {
     describe("empty", function () {
 
         it("should own no properties", function () {
-            expect(Object.getOwnPropertyNames(Object.empty)).toEqual([]);
-            expect(Object.keys(Object.empty)).toEqual([]);
+            expect(Object.getOwnPropertyNames(ShimObject.empty)).toEqual([]);
+            expect(Object.keys(ShimObject.empty)).toEqual([]);
         });
 
         it("should have no prototype", function () {
-            expect(Object.getPrototypeOf(Object.empty)).toBe(null);
+            expect(Object.getPrototypeOf(ShimObject.empty)).toBe(null);
         });
 
         it("should be immutable", function () {
             "strict mode";
             expect(function () {
-                Object.empty.a = 10; // should throw an error in strict mode
-                if (Object.empty.a !== 10) {
+                ShimObject.empty.a = 10; // should throw an error in strict mode
+                if (ShimObject.empty.a !== 10) {
                     throw new Error("Unchanged");
                 }
             }).toThrow();
@@ -54,7 +55,7 @@ describe("Object", function () {
             ]
         ].forEach(function (test) {
             it("should recognize that " + test[0], function () {
-                expect(Object.isObject(test[1])).toEqual(test[2]);
+                expect(ShimObject.isObject(test[1])).toEqual(test[2]);
             });
         });
 
@@ -77,7 +78,7 @@ describe("Object", function () {
 
         tests.forEach(function (test) {
             it(test[2], function () {
-                expect(Object.getValueOf(test[0])).toBe(test[1]);
+                expect(ShimObject.getValueOf(test[0])).toBe(test[1]);
             });
         });
 
@@ -86,11 +87,11 @@ describe("Object", function () {
     describe("owns", function () {
 
         it("should recognized an owned property", function () {
-            expect(Object.owns({a: 0}, "a")).toEqual(true);
+            expect(ShimObject.owns({a: 0}, "a")).toEqual(true);
         });
 
         it("should distinguish an inherited property", function () {
-            expect(Object.owns(Object.prototype, "toString")).toEqual(true);
+            expect(ShimObject.owns(Object.prototype, "toString")).toEqual(true);
         });
 
     });
@@ -98,33 +99,33 @@ describe("Object", function () {
     describe("has", function () {
 
         it("should recognized an owned property", function () {
-            expect(Object.has({toString: true}, "toString")).toEqual(true);
+            expect(ShimObject.has({toString: true}, "toString")).toEqual(true);
         });
 
         it("should recognize an inherited propertry", function () {
             var parent = {"a": 10};
             var child = Object.create(parent);
-            expect(Object.has(child, "a")).toEqual(true);
+            expect(ShimObject.has(child, "a")).toEqual(true);
         });
 
         it("should distinguish a property from the Object prototype", function () {
-            expect(Object.has({}, "toString")).toEqual(false);
+            expect(ShimObject.has({}, "toString")).toEqual(false);
         });
 
         it("should recognize a property on a null prototype chain", function () {
             var parent = Object.create(null);
             parent.a = 10;
             var child = Object.create(parent);
-            expect(Object.has(child, "a")).toEqual(true);
+            expect(ShimObject.has(child, "a")).toEqual(true);
         });
 
         it("should recognize a falsy property", function () {
-            expect(Object.has({a:0}, "a")).toEqual(true);
+            expect(ShimObject.has({a:0}, "a")).toEqual(true);
         });
 
         it("should throw an error if the first argument is not an object", function () {
             expect(function () {
-                Object.has(10, 10);
+                ShimObject.has(10, 10);
             }).toThrow();
         });
 
@@ -137,16 +138,16 @@ describe("Object", function () {
                 }
             });
             var instance = Object.create(Type);
-            expect(Object.has(instance, "a")).toEqual(true);
-            expect(Object.has(instance, "toString")).toEqual(false);
+            expect(ShimObject.has(instance, "a")).toEqual(true);
+            expect(ShimObject.has(instance, "toString")).toEqual(false);
         });
 
         it("should delegate to a set", function () {
             var Set = require("../set");
             var set = new Set([1, 2, 3]);
-            expect(Object.has(set, 2)).toEqual(true);
-            expect(Object.has(set, 4)).toEqual(false);
-            expect(Object.has(set, "toString")).toEqual(false);
+            expect(ShimObject.has(set, 2)).toEqual(true);
+            expect(ShimObject.has(set, 4)).toEqual(false);
+            expect(ShimObject.has(set, "toString")).toEqual(false);
         });
 
     });
@@ -154,11 +155,11 @@ describe("Object", function () {
     describe("get", function () {
 
         it("should get an owned property from an object literal", function () {
-            expect(Object.get({a: 10}, "a")).toEqual(10);
+            expect(ShimObject.get({a: 10}, "a")).toEqual(10);
         });
 
         it("should not get a property from the Object prototype on a literal", function () {
-            expect(Object.get({}, "toString")).toEqual(undefined);
+            expect(ShimObject.get({}, "toString")).toEqual(undefined);
         });
 
         it("should delegate to a prototype method", function () {
@@ -171,15 +172,15 @@ describe("Object", function () {
                 }
             });
             var instance = Object.create(Type);
-            expect(Object.get(instance, "a")).toEqual(10);
+            expect(ShimObject.get(instance, "a")).toEqual(10);
         });
 
         it("should not delegate to an owned 'get' method", function () {
-            expect(Object.get({get: 10}, "get")).toEqual(10);
+            expect(ShimObject.get({get: 10}, "get")).toEqual(10);
         });
 
         it("should fallback to a default argument if defined", function () {
-            expect(Object.get({}, "toString", 10)).toEqual(10);
+            expect(ShimObject.get({}, "toString", 10)).toEqual(10);
         });
 
     });
@@ -188,8 +189,8 @@ describe("Object", function () {
 
         it("should set a property", function () {
             var object = {};
-            Object.set(object, "set", 10);
-            expect(Object.get(object, "set")).toEqual(10);
+            ShimObject.set(object, "set", 10);
+            expect(ShimObject.get(object, "set")).toEqual(10);
         });
 
         it("should delegate to a 'set' method", function () {
@@ -200,7 +201,7 @@ describe("Object", function () {
                 }
             });
             var instance = Object.create(Type);
-            Object.set(instance, "a", 10);
+            ShimObject.set(instance, "a", 10);
             expect(spy.argsForCall).toEqual([
                 ["a", 10]
             ]);
@@ -213,7 +214,7 @@ describe("Object", function () {
         it("should iterate the owned properties of an object", function () {
             var spy = jasmine.createSpy();
             var object = {a: 10, b: 20, c: 30};
-            Object.forEach(object, spy);
+            ShimObject.forEach(object, spy);
             expect(spy.argsForCall).toEqual([
                 [10, "a", object],
                 [20, "b", object],
@@ -223,7 +224,7 @@ describe("Object", function () {
 
         it("should pass a thisp into the callback", function () {
             var thisp = {};
-            Object.forEach([1], function (value, key, object) {
+            ShimObject.forEach([1], function (value, key, object) {
                 expect(this).toBe(thisp);
                 expect(value).toEqual(1);
                 expect(key).toEqual("0");
@@ -239,7 +240,7 @@ describe("Object", function () {
 
         it("should iterate the owned properties of an object with a context thisp", function () {
             var object = {a: 10, b: 20}
-            var result = Object.map(object, function (value, key, o) {
+            var result = ShimObject.map(object, function (value, key, o) {
                 expect(o).toBe(object);
                 return key + this + value;
             }, ": ").join(", ");
@@ -251,7 +252,7 @@ describe("Object", function () {
     describe("values", function () {
 
         it("should produce the values for owned properties", function () {
-            expect(Object.values({b: 10, a: 20})).toEqual([10, 20]);
+            expect(ShimObject.values({b: 10, a: 20})).toEqual([10, 20]);
         });
 
     });
@@ -259,19 +260,19 @@ describe("Object", function () {
     describe("concat", function () {
 
         it("should merge objects into a new object", function () {
-            expect(Object.concat({a: 10}, {b: 20})).toEqual({a: 10, b: 20});
+            expect(ShimObject.concat({a: 10}, {b: 20})).toEqual({a: 10, b: 20});
         });
 
         it("should prioritize latter objects", function () {
-            expect(Object.concat({a: 10}, {a: 20})).toEqual({a: 20});
+            expect(ShimObject.concat({a: 10}, {a: 20})).toEqual({a: 20});
         });
 
         it("should delegate to arrays", function () {
-            expect(Object.concat({a: 10, b: 20}, [['c', 30]])).toEqual({a: 10, b: 20, c: 30});
+            expect(ShimObject.concat({a: 10, b: 20}, [['c', 30]])).toEqual({a: 10, b: 20, c: 30});
         });
 
         it("should delegate to maps", function () {
-            expect(Object.concat({a: 10, b: 20}, Dict({c: 30}))).toEqual({a: 10, b: 20, c: 30});
+            expect(ShimObject.concat({a: 10, b: 20}, Dict({c: 30}))).toEqual({a: 10, b: 20, c: 30});
         });
 
     });
@@ -290,13 +291,13 @@ describe("Object", function () {
             'other objects': {}
         };
 
-        Object.forEach(distinctValues, function (a, ai) {
-            Object.forEach(distinctValues, function (b, bi) {
+        ShimObject.forEach(distinctValues, function (a, ai) {
+            ShimObject.forEach(distinctValues, function (b, bi) {
                 if (ai < bi)
                     return;
                 var operation = ai === bi ? "recognizes" : "distinguishes";
                 it(operation + " " + ai + " and " + bi, function () {
-                    expect(Object.is(a, b)).toEqual(ai === bi);
+                    expect(ShimObject.is(a, b)).toEqual(ai === bi);
                 });
             });
         });
@@ -355,15 +356,15 @@ describe("Object", function () {
         // everything should be equal to every other thing in
         // its equivalence class
         equivalenceClasses.forEach(function (equivalenceClass) {
-            Object.forEach(equivalenceClass, function (a, ai) {
-                equivalenceClass[ai + " clone"] = Object.clone(a);
+            ShimObject.forEach(equivalenceClass, function (a, ai) {
+                equivalenceClass[ai + " clone"] = ShimObject.clone(a);
             });
             // within each pair of class, test exhaustive combinations to cover
             // the commutative property
-            Object.forEach(equivalenceClass, function (a, ai) {
-                Object.forEach(equivalenceClass, function (b, bi) {
+            ShimObject.forEach(equivalenceClass, function (a, ai) {
+                ShimObject.forEach(equivalenceClass, function (b, bi) {
                     it(": " + ai + " equals " + bi, function () {
-                        expect(Object.equals(a, b)).toBe(true);
+                        expect(ShimObject.equals(a, b)).toBe(true);
                     });
                 });
             });
@@ -382,10 +383,10 @@ describe("Object", function () {
                     return;
                 // but within each pair of classes, test exhaustive
                 // combinations to cover the commutative property
-                Object.forEach(aClass, function (a, ai) {
-                    Object.forEach(bClass, function (b, bi) {
+                ShimObject.forEach(aClass, function (a, ai) {
+                    ShimObject.forEach(bClass, function (b, bi) {
                         it(ai + " not equals " + bi, function () {
-                            expect(Object.equals(a, b)).toBe(false);
+                            expect(ShimObject.equals(a, b)).toBe(false);
                         });
                     });
                 });
@@ -453,7 +454,7 @@ describe("Object", function () {
                     JSON.stringify(test[1])
                 ),
                 function () {
-                    expect(Object.compare(test[0], test[1])).toEqual(test[2]);
+                    expect(ShimObject.compare(test[0], test[1])).toEqual(test[2]);
                 }
             );
         });
@@ -498,25 +499,25 @@ describe("Object", function () {
         graph.typedObject.a = 10;
         graph.typedObject.b = 10;
 
-        Object.forEach(graph, function (value, name) {
+        ShimObject.forEach(graph, function (value, name) {
             it(name + " cloned equals self", function () {
-                expect(Object.clone(value)).toEqual(value);
+                expect(ShimObject.clone(value)).toEqual(value);
             });
         });
 
         it("should clone zero levels of depth", function () {
-            var clone = Object.clone(graph, 0);
+            var clone = ShimObject.clone(graph, 0);
             expect(clone).toBe(graph);
         });
 
         it("should clone object at one level of depth", function () {
-            var clone = Object.clone(graph, 1);
+            var clone = ShimObject.clone(graph, 1);
             expect(clone).toEqual(graph);
             expect(clone).toNotBe(graph);
         });
 
         it("should clone object at two levels of depth", function () {
-            var clone = Object.clone(graph, 2);
+            var clone = ShimObject.clone(graph, 2);
             expect(clone).toEqual(graph);
             expect(clone.object).toNotBe(graph.object);
             expect(clone.object).toEqual(graph.object);
@@ -524,24 +525,24 @@ describe("Object", function () {
         });
 
         it("should clone array at two levels of depth", function () {
-            var clone = Object.clone(graph, 2);
+            var clone = ShimObject.clone(graph, 2);
             expect(clone).toEqual(graph);
             expect(clone.array).toNotBe(graph.array);
             expect(clone.array).toEqual(graph.array);
         });
 
         it("should clone identical values at least once", function () {
-            var clone = Object.clone(graph);
+            var clone = ShimObject.clone(graph);
             expect(clone.cycle).toNotBe(graph.cycle);
         });
 
         it("should clone identical values only once", function () {
-            var clone = Object.clone(graph);
+            var clone = ShimObject.clone(graph);
             expect(clone.cycle).toBe(clone);
         });
 
         it("should clone clonable", function () {
-            var clone = Object.clone(graph);
+            var clone = ShimObject.clone(graph);
             expect(clone.clonable).toBe(graph.clonable);
         });
 
@@ -551,18 +552,18 @@ describe("Object", function () {
         var object = {a: {a1: 10, a2: 20}, b: {b1: 10, b2: 20}};
 
         it("should clone zero levels", function () {
-            expect(Object.clone(object, 0)).toBe(object);
+            expect(ShimObject.clone(object, 0)).toBe(object);
         });
 
         it("should clone one level", function () {
-            var clone = Object.clone(object, 1);
+            var clone = ShimObject.clone(object, 1);
             expect(clone).toEqual(object);
             expect(clone).toNotBe(object);
             expect(clone.a).toBe(object.a);
         });
 
         it("should clone two levels", function () {
-            var clone = Object.clone(object, 2);
+            var clone = ShimObject.clone(object, 2);
             expect(clone).toEqual(object);
             expect(clone).toNotBe(object);
             expect(clone.a).toNotBe(object.a);
@@ -571,7 +572,7 @@ describe("Object", function () {
         it("should clone with reference cycles", function () {
             var cycle = {};
             cycle.cycle = cycle;
-            var clone = Object.clone(cycle);
+            var clone = ShimObject.clone(cycle);
             expect(clone).toEqual(cycle);
             expect(clone).toNotBe(cycle);
             expect(clone.cycle).toBe(clone);
@@ -582,7 +583,7 @@ describe("Object", function () {
     describe("clear", function () {
 
         it("should clear all owned properties of the object", function () {
-            expect(Object.keys(Object.clear({a: 10}))).toEqual([]);
+            expect(Object.keys(ShimObject.clear({a: 10}))).toEqual([]);
         });
 
     });

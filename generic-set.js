@@ -1,4 +1,6 @@
 
+var ShimArray = require("./shim-array");
+
 module.exports = GenericSet;
 function GenericSet() {
     throw new Error("Can't construct. GenericSet is a mixin.");
@@ -13,9 +15,15 @@ GenericSet.prototype.union = function (that) {
 };
 
 GenericSet.prototype.intersection = function (that) {
-    return this.constructClone(this.filter(function (value) {
-        return that.has(value);
-    }));
+    return this.constructClone(this.filter(
+        !that.has && that instanceof Array
+        ? function(value) {
+            return ShimArray.prototype.has.call(that, value);
+        }
+        : function (value) {
+            return that.has(value);
+        }
+    ));
 };
 
 GenericSet.prototype.difference = function (that) {

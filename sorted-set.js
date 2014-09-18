@@ -3,6 +3,8 @@
 module.exports = SortedSet;
 
 var Shim = require("./shim");
+var ShimObject = require("./shim-object");
+var ShimFunction = require("./shim-function");
 var GenericCollection = require("./generic-collection");
 var GenericSet = require("./generic-set");
 var PropertyChanges = require("./listen/property-changes");
@@ -13,9 +15,9 @@ function SortedSet(values, equals, compare, getDefault) {
     if (!(this instanceof SortedSet)) {
         return new SortedSet(values, equals, compare, getDefault);
     }
-    this.contentEquals = equals || Object.equals;
-    this.contentCompare = compare || Object.compare;
-    this.getDefault = getDefault || Function.noop;
+    this.contentEquals = equals || ShimObject.equals;
+    this.contentCompare = compare || ShimObject.compare;
+    this.getDefault = getDefault || ShimFunction.noop;
     this.root = null;
     this.length = 0;
     this.addEach(values);
@@ -24,10 +26,10 @@ function SortedSet(values, equals, compare, getDefault) {
 // hack so require("sorted-set").SortedSet will work in MontageJS
 SortedSet.SortedSet = SortedSet;
 
-Object.addEach(SortedSet.prototype, GenericCollection.prototype);
-Object.addEach(SortedSet.prototype, GenericSet.prototype);
-Object.addEach(SortedSet.prototype, PropertyChanges.prototype);
-Object.addEach(SortedSet.prototype, RangeChanges.prototype);
+ShimObject.addEach(SortedSet.prototype, GenericCollection.prototype);
+ShimObject.addEach(SortedSet.prototype, GenericSet.prototype);
+ShimObject.addEach(SortedSet.prototype, PropertyChanges.prototype);
+ShimObject.addEach(SortedSet.prototype, RangeChanges.prototype);
 
 SortedSet.prototype.isSorted = true;
 

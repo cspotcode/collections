@@ -3,6 +3,7 @@
 module.exports = SortedArraySet;
 
 var Shim = require("./shim");
+var ShimObject = require("./shim-object");
 var SortedArray = require("./sorted-array");
 var GenericSet = require("./generic-set");
 var PropertyChanges = require("./listen/property-changes");
@@ -21,8 +22,8 @@ SortedArraySet.prototype = Object.create(SortedArray.prototype);
 
 SortedArraySet.prototype.constructor = SortedArraySet;
 
-Object.addEach(SortedArraySet.prototype, GenericSet.prototype);
-Object.addEach(SortedArraySet.prototype, PropertyChanges.prototype);
+ShimObject.addEach(SortedArraySet.prototype, GenericSet.prototype);
+ShimObject.addEach(SortedArraySet.prototype, PropertyChanges.prototype);
 
 SortedArraySet.prototype.isSorted = true;
 

@@ -1,13 +1,14 @@
 
 require("../shim-object");
-require("../shim-function");
+var ShimFunction = require("../shim-function");
+var ShimObject = require("../shim-object");
 
 describe("Function", function () {
 
     describe("identity", function () {
 
         it("should return the first argument", function () {
-            expect(Function.identity(1, 2, 3)).toBe(1);
+            expect(ShimFunction.identity(1, 2, 3)).toBe(1);
         });
 
     });
@@ -17,7 +18,7 @@ describe("Function", function () {
         // should do nothing (not verifiable)
 
         it("should return nothing", function () {
-            expect(Function.noop(1, 2, 3)).toBe(undefined);
+            expect(ShimFunction.noop(1, 2, 3)).toBe(undefined);
         });
 
     });
@@ -27,9 +28,9 @@ describe("Function", function () {
             return x.a;
         };
         var wrappedCompare = function (a, b) {
-            return Object.compare(a, b);
+            return ShimObject.compare(a, b);
         };
-        var compare = Function.by(getA, wrappedCompare);
+        var compare = ShimFunction.by(getA, wrappedCompare);
 
         it("should compare two values", function () {
             expect(compare({a: 10}, {a: 20})).toBe(-10);

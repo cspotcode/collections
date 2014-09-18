@@ -1,8 +1,18 @@
 "use strict";
 
+var circularDeps = require("./circular-dependency-helper")(module);
+
+var ShimFunction = require("./shim-function");
+var ShimArray = require("./shim-array");
 var WeakMap = require("weak-map");
 
-module.exports = Object;
+circularDeps.getIfCircular(ShimArray, function(e) {
+    ShimArray = e;
+});
+
+var ShimObject = module.exports = {};
+
+circularDeps.notify();
 
 /*
     Based in part on extras from Motorola Mobility’s Montage
@@ -22,7 +32,7 @@ module.exports = Object;
 
     @object external:Object.empty
 */
-Object.empty = Object.freeze(Object.create(null));
+ShimObject.empty = Object.freeze(Object.create(null));
 
 /**
     Returns whether the given value is an object, as opposed to a value.
@@ -33,7 +43,7 @@ Object.empty = Object.freeze(Object.create(null));
     @param {Any} value
     @returns {Boolean} whether the given value is an object
 */
-Object.isObject = function (object) {
+ShimObject.isObject = function (object) {
     return Object(object) === object;
 };
 
@@ -57,7 +67,7 @@ Object.isObject = function (object) {
     @returns {Any} the primitive value of that object, if one exists, or passes
     the value through
 */
-Object.getValueOf = function (value) {
+ShimObject.getValueOf = function (value) {
     if (value && typeof value.valueOf === "function") {
         value = value.valueOf();
     }
@@ -65,7 +75,7 @@ Object.getValueOf = function (value) {
 };
 
 var hashMap = new WeakMap();
-Object.hash = function (object) {
+ShimObject.hash = function (object) {
     if (object && typeof object.hash === "function") {
         return "" + object.hash();
     } else if (Object(object) === object) {
@@ -90,7 +100,7 @@ Object.hash = function (object) {
     @returns {Boolean} whether the object owns a property wfor the given key.
 */
 var owns = Object.prototype.hasOwnProperty;
-Object.owns = function (object, key) {
+ShimObject.owns = function (object, key) {
     return owns.call(object, key);
 };
 
@@ -116,7 +126,7 @@ Object.owns = function (object, key) {
     <code>Object.prototype</code>
     @function external:Object.has
 */
-Object.has = function (object, key) {
+ShimObject.has = function (object, key) {
     if (typeof object !== "object") {
         throw new Error("Object.has can't accept non-object: " + typeof object);
     }
@@ -155,14 +165,14 @@ Object.has = function (object, key) {
     @returns {Any} value for key, or default value
     @function external:Object.get
 */
-Object.get = function (object, key, value) {
+ShimObject.get = function (object, key, value) {
     if (typeof object !== "object") {
         throw new Error("Object.get can't accept non-object: " + typeof object);
     }
     // forward to mapped collections that implement "get"
     if (object && typeof object.get === "function") {
         return object.get(key, value);
-    } else if (Object.has(object, key)) {
+    } else if (ShimObject.has(object, key)) {
         return object[key];
     } else {
         return value;
@@ -183,7 +193,7 @@ Object.get = function (object, key, value) {
     @returns <code>undefined</code>
     @function external:Object.set
 */
-Object.set = function (object, key, value) {
+ShimObject.set = function (object, key, value) {
     if (object && typeof object.set === "function") {
         object.set(key, value);
     } else {
@@ -191,7 +201,7 @@ Object.set = function (object, key, value) {
     }
 };
 
-Object.addEach = function (target, source) {
+ShimObject.addEach = function (target, source) {
     if (!source) {
     } else if (typeof source.forEach === "function" && !source.hasOwnProperty("forEach")) {
         // copy map-alikes
@@ -230,7 +240,7 @@ Object.addEach = function (target, source) {
     @param {Object} thisp the <code>this</code> to pass through to the
     callback
 */
-Object.forEach = function (object, callback, thisp) {
+ShimObject.forEach = function (object, callback, thisp) {
     Object.keys(object).forEach(function (key) {
         callback.call(thisp, object[key], key, object);
     });
@@ -250,7 +260,7 @@ Object.forEach = function (object, callback, thisp) {
     @returns {Array} the respective values returned by the callback for each
     item in the object.
 */
-Object.map = function (object, callback, thisp) {
+ShimObject.map = function (object, callback, thisp) {
     return Object.keys(object).map(function (key) {
         return callback.call(thisp, object[key], key, object);
     });
@@ -264,20 +274,20 @@ Object.map = function (object, callback, thisp) {
     @returns {Array} the respective value for each owned property of the
     object.
 */
-Object.values = function (object) {
-    return Object.map(object, Function.identity);
+ShimObject.values = function (object) {
+    return ShimObject.map(object, ShimFunction.identity);
 };
 
 // TODO inline document concat
-Object.concat = function () {
+ShimObject.concat = function () {
     var object = {};
     for (var i = 0; i < arguments.length; i++) {
-        Object.addEach(object, arguments[i]);
+        ShimObject.addEach(object, arguments[i]);
     }
     return object;
 };
 
-Object.from = Object.concat;
+ShimObject.from = ShimObject.concat;
 
 /**
     Returns whether two values are identical.  Any value is identical to itself
@@ -293,7 +303,7 @@ Object.from = Object.concat;
     @returns {Boolean} whether this and that are identical
     @function external:Object.is
 */
-Object.is = function (x, y) {
+ShimObject.is = function (x, y) {
     if (x === y) {
         // 0 === -0, but they are not identical
         return x !== 0 || 1 / x === 1 / y;
@@ -342,28 +352,38 @@ Object.is = function (x, y) {
     @returns {Boolean} whether the values are deeply equivalent
     @function external:Object.equals
 */
-Object.equals = function (a, b, equals, memo) {
-    equals = equals || Object.equals;
+ShimObject.equals = function (a, b, equals, memo) {
+    equals = equals || ShimObject.equals;
     // unbox objects, but do not confuse object literals
-    a = Object.getValueOf(a);
-    b = Object.getValueOf(b);
+    a = ShimObject.getValueOf(a);
+    b = ShimObject.getValueOf(b);
     if (a === b)
         return true;
-    if (Object.isObject(a)) {
+    if (ShimObject.isObject(a)) {
         memo = memo || new WeakMap();
         if (memo.has(a)) {
             return true;
         }
         memo.set(a, true);
     }
-    if (Object.isObject(a) && typeof a.equals === "function") {
-        return a.equals(b, equals, memo);
+    if (ShimObject.isObject(a)) {
+        if (typeof a.equals === "function") {
+            return a.equals(b, equals, memo);
+        }
+        if (a instanceof Array) {
+            return ShimArray.prototype.equals.call(a, b, equals, memo);
+        }
     }
     // commutative
-    if (Object.isObject(b) && typeof b.equals === "function") {
-        return b.equals(a, equals, memo);
+    if (ShimObject.isObject(b)) {
+        if (typeof b.equals === "function") {
+            return b.equals(a, equals, memo);
+        }
+        if (b instanceof Array) {
+            return ShimArray.prototype.equals.call(b, a, equals, memo);
+        }
     }
-    if (Object.isObject(a) && Object.isObject(b)) {
+    if (ShimObject.isObject(a) && ShimObject.isObject(b)) {
         if (Object.getPrototypeOf(a) === Object.prototype && Object.getPrototypeOf(b) === Object.prototype) {
             for (var name in a) {
                 if (!equals(a[name], b[name], equals, memo)) {
@@ -428,11 +448,11 @@ Object.equals = function (a, b, equals, memo) {
     as the left and right values.
     @function external:Object.compare
 */
-Object.compare = function (a, b) {
+ShimObject.compare = function (a, b) {
     // unbox objects, but do not confuse object literals
     // mercifully handles the Date case
-    a = Object.getValueOf(a);
-    b = Object.getValueOf(b);
+    a = ShimObject.getValueOf(a);
+    b = ShimObject.getValueOf(b);
     if (a === b)
         return 0;
     var aType = typeof a;
@@ -444,9 +464,13 @@ Object.compare = function (a, b) {
         // the possibility of equality elimiated above
     if (a && typeof a.compare === "function")
         return a.compare(b);
+    if (a && a instanceof Array)
+        return ShimArray.prototype.compare.call(a, b);
     // not commutative, the relationship is reversed
     if (b && typeof b.compare === "function")
         return -b.compare(a);
+    if (b && b instanceof Array)
+        return -ShimArray.prototype.compare.call(b, a);
     return 0;
 };
 
@@ -467,25 +491,27 @@ Object.compare = function (a, b) {
     the cloned graph.
     @returns a copy of the value
 */
-Object.clone = function (value, depth, memo) {
-    value = Object.getValueOf(value);
+ShimObject.clone = function (value, depth, memo) {
+    value = ShimObject.getValueOf(value);
     memo = memo || new WeakMap();
     if (depth === undefined) {
         depth = Infinity;
     } else if (depth === 0) {
         return value;
     }
-    if (Object.isObject(value)) {
+    if (ShimObject.isObject(value)) {
         if (!memo.has(value)) {
             if (value && typeof value.clone === "function") {
                 memo.set(value, value.clone(depth, memo));
+            } else if(value instanceof Array) {
+                memo.set(value, ShimArray.prototype.clone.call(value, depth, memo));
             } else {
                 var prototype = Object.getPrototypeOf(value);
                 if (prototype === null || prototype === Object.prototype) {
                     var clone = Object.create(prototype);
                     memo.set(value, clone);
                     for (var key in value) {
-                        clone[key] = Object.clone(value[key], depth - 1, memo);
+                        clone[key] = ShimObject.clone(value[key], depth - 1, memo);
                     }
                 } else {
                     throw new Error("Can't clone " + value);
@@ -504,7 +530,7 @@ Object.clone = function (value, depth, memo) {
     @function external:Object.clear
     @returns this
 */
-Object.clear = function (object) {
+ShimObject.clear = function (object) {
     if (object && typeof object.clear === "function") {
         object.clear();
     } else {

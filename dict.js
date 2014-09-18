@@ -1,6 +1,8 @@
 "use strict";
 
 var Shim = require("./shim");
+var ShimObject = require("./shim-object");
+var ShimFunction = require("./shim-function");
 var GenericCollection = require("./generic-collection");
 var GenericMap = require("./generic-map");
 var PropertyChanges = require("./listen/property-changes");
@@ -12,7 +14,7 @@ function Dict(values, getDefault) {
     if (!(this instanceof Dict)) {
         return new Dict(values, getDefault);
     }
-    getDefault = getDefault || Function.noop;
+    getDefault = getDefault || ShimFunction.noop;
     this.getDefault = getDefault;
     this.store = {};
     this.length = 0;
@@ -32,9 +34,9 @@ function unmangle(mangled) {
     return mangled.slice(1);
 }
 
-Object.addEach(Dict.prototype, GenericCollection.prototype);
-Object.addEach(Dict.prototype, GenericMap.prototype);
-Object.addEach(Dict.prototype, PropertyChanges.prototype);
+ShimObject.addEach(Dict.prototype, GenericCollection.prototype);
+ShimObject.addEach(Dict.prototype, GenericMap.prototype);
+ShimObject.addEach(Dict.prototype, PropertyChanges.prototype);
 
 Dict.prototype.constructClone = function (values) {
     return new this.constructor(values, this.getDefault);

@@ -1,4 +1,6 @@
 
+var ShimArray = require("../shim-array");
+var ShimObject = require("../shim-object");
 var GenericCollection = require("../generic-collection");
 
 module.exports = describeOrder;
@@ -15,7 +17,7 @@ function describeOrder(Collection) {
     function FakeArray() {
         this.length = 3;
     }
-    Object.addEach(FakeArray.prototype, GenericCollection.prototype);
+    ShimObject.addEach(FakeArray.prototype, GenericCollection.prototype);
     FakeArray.prototype.reduce = function (callback, basis) {
         basis = callback(basis, 10, 0, this);
         basis = callback(basis, 20, 1, this);
@@ -50,19 +52,19 @@ function describeOrder(Collection) {
 
         // contains 10, 20, 30
         it("a fake array should be equal to collection", function () {
-            expect(Object.compare(fakeArray, Collection([10, 20, 30]))).toEqual(0);
+            expect(ShimObject.compare(fakeArray, Collection([10, 20, 30]))).toEqual(0);
         });
 
         it("a fake array should be less than a collection", function () {
-            expect(Object.compare(fakeArray, Collection([10, 30]))).toEqual(-10);
+            expect(ShimObject.compare(fakeArray, Collection([10, 30]))).toEqual(-10);
         });
 
         it("a fake array should be greater than a real array because it is longer", function () {
-            expect(Object.compare(fakeArray, Collection([10, 20]))).toEqual(1);
+            expect(ShimObject.compare(fakeArray, Collection([10, 20]))).toEqual(1);
         });
 
         it("a fake array should be less than a longer but otherwise equal", function () {
-            expect(Object.compare(fakeArray, Collection([10, 20, 30, 40]))).toEqual(-1);
+            expect(ShimObject.compare(fakeArray, Collection([10, 20, 30, 40]))).toEqual(-1);
         });
 
         it("an array should be equal to a fake array", function () {
@@ -340,7 +342,7 @@ function describeOrder(Collection) {
         });
 
         it("should clone with depth 1", function () {
-            var collection = [Collection({})];
+            var collection = ShimArray(Collection({}));
             expect(collection.clone(1)).toNotBe(collection);
             expect(collection.clone(1).one()).toBe(collection.one());
         });

@@ -1,4 +1,5 @@
 
+var ShimObject = require("../shim-object");
 var Set = require("../set");
 var describeCollection = require("./collection");
 var describeSet = require("./set");
@@ -16,14 +17,14 @@ describe("Set", function () {
     });
 
     describeCollection(function (values) {
-        return Set(values, Object.is);
+        return Set(values, ShimObject.is);
     }, [{}, {}, {}, {}], true);
 
     it("should pop and shift", function () {
         var a = {i: 2};
         var b = {i: 1};
         var c = {i: 0};
-        var set = Set([a, b, c], Object.is);
+        var set = Set([a, b, c], ShimObject.is);
         expect(set.pop()).toBe(c);
         expect(set.shift()).toBe(a);
     });

@@ -1,6 +1,8 @@
 "use strict";
 
 var Shim = require("./shim");
+var ShimObject = require("./shim-object");
+var ShimFunction = require("./shim-function");
 var Set = require("./set");
 var GenericCollection = require("./generic-collection");
 var GenericSet = require("./generic-set");
@@ -14,9 +16,9 @@ function LruSet(values, capacity, equals, hash, getDefault) {
         return new LruSet(values, capacity, equals, hash, getDefault);
     }
     capacity = capacity || Infinity;
-    equals = equals || Object.equals;
-    hash = hash || Object.hash;
-    getDefault = getDefault || Function.noop;
+    equals = equals || ShimObject.equals;
+    hash = hash || ShimObject.hash;
+    getDefault = getDefault || ShimFunction.noop;
     this.store = new Set(undefined, equals, hash);
     this.contentEquals = equals;
     this.contentHash = hash;
@@ -28,10 +30,10 @@ function LruSet(values, capacity, equals, hash, getDefault) {
 
 LruSet.LruSet = LruSet; // hack so require("lru-set").LruSet will work in MontageJS
 
-Object.addEach(LruSet.prototype, GenericCollection.prototype);
-Object.addEach(LruSet.prototype, GenericSet.prototype);
-Object.addEach(LruSet.prototype, PropertyChanges.prototype);
-Object.addEach(LruSet.prototype, RangeChanges.prototype);
+ShimObject.addEach(LruSet.prototype, GenericCollection.prototype);
+ShimObject.addEach(LruSet.prototype, GenericSet.prototype);
+ShimObject.addEach(LruSet.prototype, PropertyChanges.prototype);
+ShimObject.addEach(LruSet.prototype, RangeChanges.prototype);
 
 LruSet.prototype.constructClone = function (values) {
     return new this.constructor(

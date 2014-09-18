@@ -13,6 +13,7 @@
 */
 
 require("../shim");
+var ShimObject = require("../shim-object");
 
 var object_owns = Object.prototype.hasOwnProperty;
 
@@ -378,7 +379,7 @@ PropertyChanges.hasOwnPropertyChangeDescriptor = function (object, key) {
 };
 
 PropertyChanges.addOwnPropertyChangeListener = function (object, key, listener, beforeChange) {
-    if (!Object.isObject(object)) {
+    if (!ShimObject.isObject(object)) {
     } else if (object.addOwnPropertyChangeListener) {
         return object.addOwnPropertyChangeListener(key, listener, beforeChange);
     } else {
@@ -387,7 +388,7 @@ PropertyChanges.addOwnPropertyChangeListener = function (object, key, listener, 
 };
 
 PropertyChanges.removeOwnPropertyChangeListener = function (object, key, listener, beforeChange) {
-    if (!Object.isObject(object)) {
+    if (!ShimObject.isObject(object)) {
     } else if (object.removeOwnPropertyChangeListener) {
         return object.removeOwnPropertyChangeListener(key, listener, beforeChange);
     } else {
@@ -396,7 +397,7 @@ PropertyChanges.removeOwnPropertyChangeListener = function (object, key, listene
 };
 
 PropertyChanges.dispatchOwnPropertyChange = function (object, key, value, beforeChange) {
-    if (!Object.isObject(object)) {
+    if (!ShimObject.isObject(object)) {
     } else if (object.dispatchOwnPropertyChange) {
         return object.dispatchOwnPropertyChange(key, value, beforeChange);
     } else {

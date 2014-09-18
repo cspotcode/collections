@@ -1,6 +1,7 @@
 "use strict";
 
-var Object = require("./shim-object");
+var ShimFunction = require("./shim-function");
+var ShimObject = require("./shim-object");
 var MapChanges = require("./listen/map-changes");
 var PropertyChanges = require("./listen/property-changes");
 
@@ -9,8 +10,8 @@ function GenericMap() {
     throw new Error("Can't construct. GenericMap is a mixin.");
 }
 
-Object.addEach(GenericMap.prototype, MapChanges.prototype);
-Object.addEach(GenericMap.prototype, PropertyChanges.prototype);
+ShimObject.addEach(GenericMap.prototype, MapChanges.prototype);
+ShimObject.addEach(GenericMap.prototype, PropertyChanges.prototype);
 
 // all of these methods depend on the constructor providing a `store` set
 
@@ -150,7 +151,7 @@ GenericMap.prototype.keys = function () {
 };
 
 GenericMap.prototype.values = function () {
-    return this.map(Function.identity);
+    return this.map(ShimFunction.identity);
 };
 
 GenericMap.prototype.entries = function () {
@@ -165,7 +166,7 @@ GenericMap.prototype.items = function () {
 };
 
 GenericMap.prototype.equals = function (that, equals) {
-    equals = equals || Object.equals;
+    equals = equals || ShimObject.equals;
     if (this === that) {
         return true;
     } else if (that && typeof that.every === "function") {
@@ -192,10 +193,10 @@ function Item(key, value) {
 }
 
 Item.prototype.equals = function (that) {
-    return Object.equals(this.key, that.key) && Object.equals(this.value, that.value);
+    return ShimObject.equals(this.key, that.key) && ShimObject.equals(this.value, that.value);
 };
 
 Item.prototype.compare = function (that) {
-    return Object.compare(this.key, that.key);
+    return ShimObject.compare(this.key, that.key);
 };
 

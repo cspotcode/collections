@@ -4,3 +4,9 @@ var Object = require("./shim-object");
 var Function = require("./shim-function");
 var RegExp = require("./shim-regexp");
 
+module.exports = {
+    ShimArray: Array,
+    ShimObject: Object,
+    ShimFunction: Function,
+    ShimRegExp: RegExp
+};

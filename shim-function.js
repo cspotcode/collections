@@ -1,5 +1,7 @@
 
-module.exports = Function;
+var ShimObject = require("./shim-object");
+
+var ShimFunction = module.exports = {};
 
 /**
     A utility to reduce unnecessary allocations of <code>function () {}</code>
@@ -8,7 +10,7 @@ module.exports = Function;
 
     @function external:Function.noop
 */
-Function.noop = function () {
+ShimFunction.noop = function () {
 };
 
 /**
@@ -20,7 +22,7 @@ Function.noop = function () {
     @param {Any} any value
     @returns {Any} that value
 */
-Function.identity = function (value) {
+ShimFunction.identity = function (value) {
     return value;
 };
 
@@ -39,9 +41,9 @@ Function.identity = function (value) {
     <code>sorted</code> can perform a transform that reduces the need to call
     <code>by</code> on each sorted object to just once.
  */
-Function.by = function (by , compare) {
-    compare = compare || Object.compare;
-    by = by || Function.identity;
+ShimFunction.by = function (by , compare) {
+    compare = compare || ShimObject.compare;
+    by = by || ShimFunction.identity;
     var compareBy = function (a, b) {
         return compare(by(a), by(b));
     };
@@ -51,9 +53,9 @@ Function.by = function (by , compare) {
 };
 
 // TODO document
-Function.get = function (key) {
+ShimFunction.get = function (key) {
     return function (object) {
-        return Object.get(object, key);
+        return ShimObject.get(object, key);
     };
 };
 

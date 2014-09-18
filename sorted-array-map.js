@@ -1,6 +1,8 @@
 "use strict";
 
 var Shim = require("./shim");
+var ShimObject = require("./shim-object");
+var ShimFunction = require("./shim-function");
 var SortedArraySet = require("./sorted-array-set");
 var GenericCollection = require("./generic-collection");
 var GenericMap = require("./generic-map");
@@ -12,9 +14,9 @@ function SortedArrayMap(values, equals, compare, getDefault) {
     if (!(this instanceof SortedArrayMap)) {
         return new SortedArrayMap(values, equals, compare, getDefault);
     }
-    equals = equals || Object.equals;
-    compare = compare || Object.compare;
-    getDefault = getDefault || Function.noop;
+    equals = equals || ShimObject.equals;
+    compare = compare || ShimObject.compare;
+    getDefault = getDefault || ShimFunction.noop;
     this.contentEquals = equals;
     this.contentCompare = compare;
     this.getDefault = getDefault;
@@ -34,9 +36,9 @@ function SortedArrayMap(values, equals, compare, getDefault) {
 // hack so require("sorted-array-map").SortedArrayMap will work in MontageJS
 SortedArrayMap.SortedArrayMap = SortedArrayMap;
 
-Object.addEach(SortedArrayMap.prototype, GenericCollection.prototype);
-Object.addEach(SortedArrayMap.prototype, GenericMap.prototype);
-Object.addEach(SortedArrayMap.prototype, PropertyChanges.prototype);
+ShimObject.addEach(SortedArrayMap.prototype, GenericCollection.prototype);
+ShimObject.addEach(SortedArrayMap.prototype, GenericMap.prototype);
+ShimObject.addEach(SortedArrayMap.prototype, PropertyChanges.prototype);
 
 SortedArrayMap.prototype.isSorted = true;
 

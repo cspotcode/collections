@@ -1,5 +1,8 @@
 
 require("../shim");
+var ShimObject = require("../shim-object");
+var ShimArray = require("../shim-array");
+var ShimFunction = require("../shim-function");
 require("../listen/array-changes");
 var GenericCollection = require("../generic-collection");
 var describeDeque = require("./deque");
@@ -8,13 +11,13 @@ var describeOrder = require("./order");
 var describeMapChanges = require("./listen/map-changes");
 
 describe("Array", function () {
-    describeDeque(Array.from);
-    describeCollection(Array.from, [1, 2, 3, 4]);
-    describeCollection(Array.from, [{id: 0}, {id: 1}, {id: 2}, {id: 3}]);
-    describeOrder(Array.from);
+    describeDeque(ShimArray.from);
+    describeCollection(ShimArray.from, [1, 2, 3, 4]);
+    describeCollection(ShimArray.from, [{id: 0}, {id: 1}, {id: 2}, {id: 3}]);
+    describeOrder(ShimArray.from);
 
     function mapAlike(entries) {
-        var array = [];
+        var array = new ShimArray();
         if (entries) {
             entries.forEach(function (pair) {
                 array.set(pair[0], pair[1]);
@@ -36,7 +39,7 @@ describe("Array", function () {
     function FakeArray() {
         this.length = 3;
     }
-    Object.addEach(FakeArray.prototype, GenericCollection.prototype);
+    ShimObject.addEach(FakeArray.prototype, GenericCollection.prototype);
     FakeArray.prototype.reduce = function (callback, basis) {
         basis = callback(basis, 10, 0, this);
         basis = callback(basis, 20, 1, this);
@@ -53,7 +56,9 @@ describe("Array", function () {
     describe("get", function () {
 
         it("should return the value for a given index", function () {
-            expect([0].get(0)).toEqual(0);
+            var array = new ShimArray();
+            array.push(0);
+            expect(array.get(0)).toEqual(0);
         });
 
         it("should not return a named property", function () {
@@ -77,11 +82,11 @@ describe("Array", function () {
     describe("find", function () {
 
         it("should find equivalent objects", function () {
-            expect([{a:10}].find({a:10})).toEqual(0);
+            expect(new ShimArray({a:10}).find({a:10})).toEqual(0);
         });
 
         it("should allow equality comparison override", function () {
-            expect([{a:10}].find({a:10}, Object.is)).toEqual(-1);
+            expect(new ShimArray({a:10}).find({a:10}, ShimObject.is)).toEqual(-1);
         });
 
     });
@@ -89,16 +94,16 @@ describe("Array", function () {
     describe("findLast", function () {
 
         it("should find equivalent objects", function () {
-            expect([{a:10}].findLast({a:10})).toEqual(0);
+            expect(new ShimArray({a:10}).findLast({a:10})).toEqual(0);
         });
 
         it("should allow equality comparison override", function () {
-            expect([{a:10}].findLast({a:10}, Object.is)).toEqual(-1);
+            expect(new ShimArray({a:10}).findLast({a:10}, ShimObject.is)).toEqual(-1);
         });
 
         it("should find the last of equivalent objects", function () {
             var object = {a: 10};
-            expect([object, {a: 10}].findLast(object)).toEqual(1);
+            expect(new ShimArray(object, {a: 10}).findLast(object)).toEqual(1);
         });
 
     });
@@ -106,17 +111,17 @@ describe("Array", function () {
     describe("has", function () {
 
         it("should find equivalent objects", function () {
-            expect([{a: 10}].has({a: 10})).toBe(true);
+            expect(new ShimArray({a: 10}).has({a: 10})).toBe(true);
         });
 
         it("should not find non-contained values", function () {
-            expect([].has(-1)).toBe(false);
+            expect(new ShimArray().has(-1)).toBe(false);
         });
 
         it("should allow equality comparison override", function () {
             var object = {};
-            expect([{}].has(object, Object.is)).toBe(false);
-            expect([object].has(object, Object.is)).toBe(true);
+            expect(new ShimArray({}).has(object, ShimObject.is)).toBe(false);
+            expect(new ShimArray(object).has(object, ShimObject.is)).toBe(true);
         });
 
     });
@@ -124,7 +129,7 @@ describe("Array", function () {
     describe("add", function () {
 
         it("should add values", function () {
-            var array = [{a: 10}];
+            var array = new ShimArray({a: 10});
             array.add({a: 10});
             expect(array[0]).toEqual({a: 10});
             expect(array[1]).toEqual({a: 10});
@@ -139,9 +144,9 @@ describe("Array", function () {
             c = {foo: [2, 3]},
             d = {foo: [3, 2]},
             e = {foo: [4]},
-            unsorted = [d, b, c, a, e], // b and c equal, in stable order
-            sorted = [a, b, c, d, e],
-            byFoo = Function.by(function (x) {
+            unsorted = new ShimArray(d, b, c, a, e), // b and c equal, in stable order
+            sorted = new ShimArray(a, b, c, d, e),
+            byFoo = ShimFunction.by(function (x) {
                 return x.foo;
             });
 
@@ -163,25 +168,25 @@ describe("Array", function () {
         // should have been adequately covered by Object.clone tests
 
         it("should clone with indefinite depth", function () {
-            var array = [[[]]];
+            var array = new ShimArray([[]]);
             var clone = array.clone();
             expect(clone).toEqual(array);
             expect(clone).toNotBe(array);
         });
 
         it("should clone with depth 0", function () {
-            var array = [];
+            var array = new ShimArray();
             expect(array.clone(0)).toBe(array);
         });
 
         it("should clone with depth 1", function () {
-            var array = [{}];
+            var array = new ShimArray({});
             expect(array.clone(1)).toNotBe(array);
             expect(array.clone(1)[0]).toBe(array[0]);
         });
 
         it("should clone with depth 2", function () {
-            var array = [{a: 10}];
+            var array = new ShimArray({a: 10});
             expect(array.clone(2)).toNotBe(array);
             expect(array.clone(2)[0]).toNotBe(array[0]);
             expect(array.clone(2)[0]).toEqual(array[0]);
@@ -191,7 +196,7 @@ describe("Array", function () {
 
     describe("zip", function () {
         it("should treat holes as undefined", function () {
-            var a = [0, 1];
+            var a = new ShimArray(0, 1);
             var b = [];
             b[1] = 'b';
             expect(a.zip(b)).toEqual([
@@ -204,12 +209,12 @@ describe("Array", function () {
     describe("group", function () {
         it("should make a histogram", function () {
 
-            var groups = [
+            var groups = new ShimArray(
                 {x: 0},
                 {x: 1},
                 {x: 2},
                 {x: 3}
-            ].group(function (object) {
+            ).group(function (object) {
                 return Math.floor(object.x / 2);
             })
             expect(groups).toEqual([
@@ -223,7 +228,7 @@ describe("Array", function () {
     describe("swap", function () {
         var array, otherArray;
         beforeEach(function () {
-            array = [1, 2, 3];
+            array = new ShimArray(1, 2, 3);
         });
         it("should be able to replace content with content of another arraylike", function () {
             otherArray = { __proto__ : Array.prototype };
@@ -259,26 +264,26 @@ describe("Array", function () {
    describe("set", function () {
 
        it("sets an inner index", function () {
-           var array = [1, 2, 3];
+           var array = new ShimArray(1, 2, 3);
            array.set(1, 10);
            expect(array).toEqual([1, 10, 3]);
        });
 
        it("sets an inner index of an observed array", function () {
-           var array = [1, 2, 3];
+           var array = new ShimArray(1, 2, 3);
            array.makeObservable();
            array.set(1, 10);
            expect(array).toEqual([1, 10, 3]);
        });
 
        it("sets an outer index", function () {
-           var array = [];
+           var array = new ShimArray();
            array.set(4, 10);
            expect(array).toEqual([ , , , , 10]);
        });
 
        it("sets an outer index of an observed array", function () {
-           var array = [];
+           var array = new ShimArray();
            array.makeObservable();
            array.set(4, 10);
            expect(array).toEqual([ , , , , 10]);
@@ -288,7 +293,7 @@ describe("Array", function () {
 
     describe("deleteAll", function () {
         it("should delete a range of equivalent values", function () {
-            var array = [1, 1, 1, 2, 2, 2, 3, 3, 3];
+            var array = new ShimArray(1, 1, 1, 2, 2, 2, 3, 3, 3);
             expect(array.deleteAll(2)).toBe(3);
             expect(array).toEqual([1, 1, 1, 3, 3, 3]);
         });

@@ -4,6 +4,8 @@
 
 var ArrayChanges = require("./listen/array-changes");
 var Shim = require("./shim");
+var ShimObject = require("./shim-object");
+var ShimArray = require("./shim-array");
 var GenericCollection = require("./generic-collection");
 var MapChanges = require("./listen/map-changes");
 var RangeChanges = require("./listen/range-changes");
@@ -17,19 +19,19 @@ function Heap(values, equals, compare) {
     if (!(this instanceof Heap)) {
         return new Heap(values, equals, compare);
     }
-    this.contentEquals = equals || Object.equals;
-    this.contentCompare = compare || Object.compare;
-    this.content = [];
+    this.contentEquals = equals || ShimObject.equals;
+    this.contentCompare = compare || ShimObject.compare;
+    this.content = new ShimArray();
     this.length = 0;
     this.addEach(values);
 }
 
 Heap.Heap = Heap; // hack so require("heap").Heap will work in MontageJS
 
-Object.addEach(Heap.prototype, GenericCollection.prototype);
-Object.addEach(Heap.prototype, PropertyChanges.prototype);
-Object.addEach(Heap.prototype, RangeChanges.prototype);
-Object.addEach(Heap.prototype, MapChanges.prototype);
+ShimObject.addEach(Heap.prototype, GenericCollection.prototype);
+ShimObject.addEach(Heap.prototype, PropertyChanges.prototype);
+ShimObject.addEach(Heap.prototype, RangeChanges.prototype);
+ShimObject.addEach(Heap.prototype, MapChanges.prototype);
 
 Heap.prototype.constructClone = function (values) {
     return new this.constructor(

@@ -13,6 +13,8 @@
 */
 
 require("../shim");
+var ShimArray = require("../shim-array");
+var ShimFunction = require("../shim-function");
 var List = require("../list");
 var WeakMap = require("weak-map");
 var PropertyChanges = require("./property-changes");
@@ -23,7 +25,7 @@ var array_splice = Array.prototype.splice;
 var array_slice = Array.prototype.slice;
 var array_reverse = Array.prototype.reverse;
 var array_sort = Array.prototype.sort;
-var array_swap = Array.prototype.swap;
+var array_swap = ShimArray.prototype.swap;
 
 var EMPTY_ARRAY = [];
 
@@ -72,7 +74,7 @@ var observableArrayProperties = {
     },
 
     makeObservable: {
-        value: Function.noop, // idempotent
+        value: ShimFunction.noop, // idempotent
         writable: true,
         configurable: true
     },
@@ -288,5 +290,5 @@ var observableArrayProperties = {
 
 };
 
-var ChangeDispatchArray = Object.create(Array.prototype, observableArrayProperties);
+var ChangeDispatchArray = Object.create(ShimArray.prototype, observableArrayProperties);
 

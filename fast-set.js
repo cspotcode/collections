@@ -1,6 +1,8 @@
 "use strict";
 
 var Shim = require("./shim");
+var ShimObject = require("./shim-object");
+var ShimFunction = require("./shim-function");
 var Dict = require("./dict");
 var List = require("./list");
 var GenericCollection = require("./generic-collection");
@@ -16,9 +18,9 @@ function FastSet(values, equals, hash, getDefault) {
     if (!(this instanceof FastSet)) {
         return new FastSet(values, equals, hash, getDefault);
     }
-    equals = equals || Object.equals;
-    hash = hash || Object.hash;
-    getDefault = getDefault || Function.noop;
+    equals = equals || ShimObject.equals;
+    hash = hash || ShimObject.hash;
+    getDefault = getDefault || ShimFunction.noop;
     this.contentEquals = equals;
     this.contentHash = hash;
     this.getDefault = getDefault;
@@ -29,9 +31,9 @@ function FastSet(values, equals, hash, getDefault) {
 
 FastSet.FastSet = FastSet; // hack so require("fast-set").FastSet will work in MontageJS
 
-Object.addEach(FastSet.prototype, GenericCollection.prototype);
-Object.addEach(FastSet.prototype, GenericSet.prototype);
-Object.addEach(FastSet.prototype, PropertyChanges.prototype);
+ShimObject.addEach(FastSet.prototype, GenericCollection.prototype);
+ShimObject.addEach(FastSet.prototype, GenericSet.prototype);
+ShimObject.addEach(FastSet.prototype, PropertyChanges.prototype);
 
 FastSet.prototype.Buckets = Dict;
 FastSet.prototype.Bucket = List;

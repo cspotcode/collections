@@ -1,5 +1,6 @@
 
-require("../shim-array");
+var ShimArray = require("../shim-array");
+var ShimObject = require("../shim-object");
 var SortedSet = require("../sorted-set");
 var TreeLog = require("../tree-log");
 var describeDeque = require("./deque");
@@ -28,7 +29,7 @@ describe("SortedSet", function () {
             this.value = value;
         }
         Value.prototype.compare = function (that) {
-            return Object.compare(this.value, that.value);
+            return ShimObject.compare(this.value, that.value);
         }
         var a = new Value(1);
         var b = new Value(2);
@@ -343,7 +344,7 @@ describe("SortedSet", function () {
                     return rand() - .5;
                 });
                 it("should bind content changes to an array for " + numbers.join(", "), function () {
-                    var mirror = [];
+                    var mirror = new ShimArray();
                     var set = SortedSet();
                     set.addRangeChangeListener(function (plus, minus, index) {
                         mirror.swap(index, minus.length, plus);

@@ -7,35 +7,61 @@
     https://github.com/motorola-mobility/montage/blob/master/LICENSE.md
 */
 
-var Function = require("./shim-function");
+var circularDeps = require("./circular-dependency-helper")(module);
+
+var ShimObject = require("./shim-object");
+var ShimFunction = require("./shim-function");
 var GenericCollection = require("./generic-collection");
 var GenericOrder = require("./generic-order");
 var WeakMap = require("weak-map");
 
-module.exports = Array;
+// TODO hack to work around circular dependency.
+// Maybe replace this with a better solution in the future?
+circularDeps.getIfCircular(GenericCollection, function(e) {
+    GenericCollection = e;
+});
+circularDeps.getIfCircular(ShimObject, function(e) {
+    ShimObject = e;
+});
+
+module.exports = ShimArray;/* TODO This used to be `= Array;` but we do not want to modify the built-in Array */
+
+circularDeps.notify();
 
 var array_splice = Array.prototype.splice;
 var array_slice = Array.prototype.slice;
 
-Array.empty = [];
-
-if (Object.freeze) {
-    Object.freeze(Array.empty);
+function ShimArray() {
+    var self = Array.apply([], arguments);
+    return ShimArray.shim(self);
 }
 
-Array.from = function (values) {
-    var array = [];
+ShimArray.shim = function(array) {
+    array.__proto__ = ShimArray.prototype;
+    return array;
+}
+
+ShimArray.prototype = Object.create(Array.prototype); /* TODO don't use Object.create?  What browser compatibility are we aiming for? */
+
+ShimArray.empty = [];
+
+if (Object.freeze) {
+    Object.freeze(ShimArray.empty);
+}
+
+ShimArray.from = function (values) {
+    var array = new ShimArray();
     array.addEach(values);
     return array;
 };
 
-Array.unzip = function (table) {
-    var transpose = [];
+ShimArray.unzip = function (table) {
+    var transpose = new ShimArray();
     var length = Infinity;
     // compute shortest row
     for (var i = 0; i < table.length; i++) {
         var row = table[i];
-        table[i] = row.toArray();
+        table[i] = row.toArray ? row.toArray() : GenericCollection.prototype.toArray.call(row);
         if (row.length < length) {
             length = row.length;
         }
@@ -53,7 +79,7 @@ Array.unzip = function (table) {
 };
 
 function define(key, value) {
-    Object.defineProperty(Array.prototype, key, {
+    Object.defineProperty(ShimArray.prototype, key, {
         value: value,
         writable: true,
         configurable: true,
@@ -61,6 +87,7 @@ function define(key, value) {
     });
 }
 
+define("constructor", ShimArray);
 define("addEach", GenericCollection.prototype.addEach);
 define("deleteEach", GenericCollection.prototype.deleteEach);
 define("toArray", GenericCollection.prototype.toArray);
@@ -79,6 +106,15 @@ define("group", GenericCollection.prototype.group);
 define("sorted", GenericCollection.prototype.sorted);
 define("reversed", GenericCollection.prototype.reversed);
 
+define("concat", function(/*...collections*/) {
+    // Behave identically to Array.prototype.concat,
+    // but return a ShimArray instead of an Array.
+    var array = Array.prototype.concat.apply(this, arguments);
+    var shimArray = new ShimArray();
+    shimArray.push.apply(shimArray, array);
+    return shimArray;
+});
+
 define("constructClone", function (values) {
     var clone = new this.constructor();
     clone.addEach(values);
@@ -86,6 +122,8 @@ define("constructClone", function (values) {
 });
 
 define("has", function (value, equals) {
+    if(!this.find)
+        return ShimArray.prototype.find.call(this, value, equals) !== -1;
     return this.find(value, equals) !== -1;
 });
 
@@ -119,7 +157,7 @@ define("delete", function (value, equals) {
 });
 
 define("deleteAll", function (value, equals) {
-    equals = equals || this.contentEquals || Object.equals;
+    equals = equals || this.contentEquals || ShimObject.equals;
     var count = 0;
     for (var index = 0; index < this.length;) {
         if (equals(value, this[index])) {
@@ -133,7 +171,7 @@ define("deleteAll", function (value, equals) {
 });
 
 define("find", function (value, equals) {
-    equals = equals || this.contentEquals || Object.equals;
+    equals = equals || this.contentEquals || ShimObject.equals;
     for (var index = 0; index < this.length; index++) {
         if (index in this && equals(value, this[index])) {
             return index;
@@ -143,7 +181,7 @@ define("find", function (value, equals) {
 });
 
 define("findLast", function (value, equals) {
-    equals = equals || this.contentEquals || Object.equals;
+    equals = equals || this.contentEquals || ShimObject.equals;
     var index = this.length;
     do {
         index--;
@@ -225,7 +263,7 @@ define("pokeBack", function (value) {
 
 define("one", function () {
     for (var i in this) {
-        if (Object.owns(this, i)) {
+        if (ShimObject.owns(this, i)) {
             return this[i];
         }
     }
@@ -236,10 +274,12 @@ if (!Array.prototype.clear) {
         this.length = 0;
         return this;
     });
+} else {
+    define("clear", Array.prototype.clear);
 }
 
 define("compare", function (that, compare) {
-    compare = compare || Object.compare;
+    compare = compare || ShimObject.compare;
     var i;
     var length;
     var lhs;
@@ -277,7 +317,7 @@ define("compare", function (that, compare) {
 });
 
 define("equals", function (that, equals) {
-    equals = equals || Object.equals;
+    equals = equals || ShimObject.equals;
     var i = 0;
     var length = this.length;
     var left;
@@ -323,10 +363,10 @@ define("clone", function (depth, memo) {
     if (memo.has(this)) {
         return memo.get(this);
     }
-    var clone = new Array(this.length);
+    var clone = (this instanceof ShimArray) ? new ShimArray(this.length) : new Array(this.length);
     memo.set(this, clone);
     for (var i in this) {
-        clone[i] = Object.clone(this[i], depth - 1, memo);
+        clone[i] = ShimObject.clone(this[i], depth - 1, memo);
     };
     return clone;
 });

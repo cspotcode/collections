@@ -3,6 +3,9 @@
 module.exports = List;
 
 var Shim = require("./shim");
+var ShimObject = require("./shim-object");
+var ShimFunction = require("./shim-function");
+var ShimArray = require("./shim-array");
 var GenericCollection = require("./generic-collection");
 var GenericOrder = require("./generic-order");
 var PropertyChanges = require("./listen/property-changes");
@@ -15,18 +18,18 @@ function List(values, equals, getDefault) {
     var head = this.head = new this.Node();
     head.next = head;
     head.prev = head;
-    this.contentEquals = equals || Object.equals;
-    this.getDefault = getDefault || Function.noop;
+    this.contentEquals = equals || ShimObject.equals;
+    this.getDefault = getDefault || ShimFunction.noop;
     this.length = 0;
     this.addEach(values);
 }
 
 List.List = List; // hack so require("list").List will work in MontageJS
 
-Object.addEach(List.prototype, GenericCollection.prototype);
-Object.addEach(List.prototype, GenericOrder.prototype);
-Object.addEach(List.prototype, PropertyChanges.prototype);
-Object.addEach(List.prototype, RangeChanges.prototype);
+ShimObject.addEach(List.prototype, GenericCollection.prototype);
+ShimObject.addEach(List.prototype, GenericOrder.prototype);
+ShimObject.addEach(List.prototype, PropertyChanges.prototype);
+ShimObject.addEach(List.prototype, RangeChanges.prototype);
 
 List.prototype.constructClone = function (values) {
     return new this.constructor(values, this.contentEquals, this.getDefault);
@@ -297,7 +300,7 @@ List.prototype.swap = function (start, length, plus) {
     if (length == null) {
         length = Infinity;
     }
-    plus = Array.from(plus);
+    plus = ShimArray.from(plus);
 
     // collect the minus array
     var minus = [];

@@ -1,3 +1,4 @@
+var ShimRegExp = module.exports = {};
 
 /**
     accepts a string; returns the string with regex metacharacters escaped.
@@ -7,8 +8,10 @@
 */
 if (!RegExp.escape) {
     var special = /[-[\]{}()*+?.\\^$|,#\s]/g;
-    RegExp.escape = function (string) {
+    ShimRegExp.escape = function (string) {
         return string.replace(special, "\\$&");
     };
+} else {
+    ShimRegExp.escape = RegExp.escape;
 }
 

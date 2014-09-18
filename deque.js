@@ -1,9 +1,10 @@
 "use strict";
 
-require("./shim-object");
+var ShimObject = require("./shim-object");
 var GenericCollection = require("./generic-collection");
 var GenericOrder = require("./generic-order");
 var RangeChanges = require("./listen/range-changes");
+var ShimObject = require("./shim-object");
 
 // by Petka Antonov
 // https://github.com/petkaantonov/deque/blob/master/js/deque.js
@@ -24,9 +25,9 @@ function Deque(values, capacity) {
     this.addEach(values);
 }
 
-Object.addEach(Deque.prototype, GenericCollection.prototype);
-Object.addEach(Deque.prototype, GenericOrder.prototype);
-Object.addEach(Deque.prototype, RangeChanges.prototype);
+ShimObject.addEach(Deque.prototype, GenericCollection.prototype);
+ShimObject.addEach(Deque.prototype, GenericOrder.prototype);
+ShimObject.addEach(Deque.prototype, RangeChanges.prototype);
 
 Deque.prototype.maxCapacity = (1 << 30) | 0;
 Deque.prototype.minCapacity = 16;
@@ -346,7 +347,7 @@ Deque.prototype.lastIndexOf = function (value, index) {
 
 // TODO rename findValue
 Deque.prototype.find = function (value, equals, index) {
-    equals = equals || Object.equals;
+    equals = equals || ShimObject.equals;
     // Default start index at beginning
     if (index == null) {
         index = 0;
@@ -368,7 +369,7 @@ Deque.prototype.find = function (value, equals, index) {
 
 // TODO rename findLastValue
 Deque.prototype.findLast = function (value, equals, index) {
-    equals = equals || Object.equals;
+    equals = equals || ShimObject.equals;
     // Default start position at the end
     if (index == null) {
         index = this.length - 1;
@@ -389,7 +390,7 @@ Deque.prototype.findLast = function (value, equals, index) {
 };
 
 Deque.prototype.has = function (value, equals) {
-    equals = equals || Object.equals;
+    equals = equals || ShimObject.equals;
     // Left to right walk
     var mask = this.capacity - 1;
     for (var index = 0; index < this.length; index++) {

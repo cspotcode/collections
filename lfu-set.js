@@ -3,6 +3,8 @@
 // Based on http://dhruvbird.com/lfu.pdf
 
 var Shim = require("./shim");
+var ShimObject = require("./shim-object");
+var ShimFunction = require("./shim-function");
 var Set = require("./set");
 var GenericCollection = require("./generic-collection");
 var GenericSet = require("./generic-set");
@@ -16,9 +18,9 @@ function LfuSet(values, capacity, equals, hash, getDefault) {
         return new LfuSet(values, capacity, equals, hash, getDefault);
     }
     capacity = capacity || Infinity;
-    equals = equals || Object.equals;
-    hash = hash || Object.hash;
-    getDefault = getDefault || Function.noop;
+    equals = equals || ShimObject.equals;
+    hash = hash || ShimObject.hash;
+    getDefault = getDefault || ShimFunction.noop;
 
     // TODO
     this.store = new Set(
@@ -42,10 +44,10 @@ function LfuSet(values, capacity, equals, hash, getDefault) {
 
 LfuSet.LfuSet = LfuSet; // hack so require("lfu-set").LfuSet will work in MontageJS
 
-Object.addEach(LfuSet.prototype, GenericCollection.prototype);
-Object.addEach(LfuSet.prototype, GenericSet.prototype);
-Object.addEach(LfuSet.prototype, PropertyChanges.prototype);
-Object.addEach(LfuSet.prototype, RangeChanges.prototype);
+ShimObject.addEach(LfuSet.prototype, GenericCollection.prototype);
+ShimObject.addEach(LfuSet.prototype, GenericSet.prototype);
+ShimObject.addEach(LfuSet.prototype, PropertyChanges.prototype);
+ShimObject.addEach(LfuSet.prototype, RangeChanges.prototype);
 
 LfuSet.prototype.constructClone = function (values) {
     return new this.constructor(

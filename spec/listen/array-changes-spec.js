@@ -1,4 +1,5 @@
 
+var ShimArray = require("../../shim-array");
 require("../../listen/array-changes");
 var describeRangeChanges = require("./range-changes");
 
@@ -7,7 +8,7 @@ describe("Array change dispatch", function () {
     // TODO (make consistent with List)
     // describeRangeChanges(Array.from);
 
-    var array = [1, 2, 3];
+    var array = ShimArray.from([1, 2, 3]);
     var spy;
 
     // the following tests all share the same initial array so they

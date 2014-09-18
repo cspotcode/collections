@@ -1,5 +1,5 @@
 
-require("../shim-regexp");
+var ShimRegExp = require("../shim-regexp");
 
 describe("RegExp", function () {
     describe("escape", function () {
@@ -18,12 +18,12 @@ describe("RegExp", function () {
         ].forEach(function (input) {
 
             it("should escape " + JSON.stringify(input), function () {
-                var re = new RegExp("^" + RegExp.escape(input) + "$");
+                var re = new RegExp("^" + ShimRegExp.escape(input) + "$");
                 expect(re.test(input)).toBe(true);
             });
 
             it("should escape case-insensitively " + JSON.stringify(input), function () {
-                var re = new RegExp("^" + RegExp.escape(input) + "$", "i");
+                var re = new RegExp("^" + ShimRegExp.escape(input) + "$", "i");
                 expect(re.test(input.toUpperCase())).toBe(true);
             });
 

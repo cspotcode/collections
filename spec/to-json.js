@@ -1,3 +1,6 @@
+
+var ShimObject = require("../shim-object");
+
 module.exports = describeToJson;
 function describeToJson(Collection, values) {
     describe("toJSON", function () {
@@ -10,9 +13,9 @@ function describeToJson(Collection, values) {
             expect(stringified).toEqual(JSON.stringify(values));
 
             if (collection.entries) {
-                expect(Object.equals(collection.entries(), newCollection.entries())).toEqual(true);
+                expect(ShimObject.equals(collection.entries(), newCollection.entries())).toEqual(true);
             } else {
-                expect(Object.equals(collection.toArray(), newCollection.toArray())).toEqual(true);
+                expect(ShimObject.equals(collection.toArray(), newCollection.toArray())).toEqual(true);
             }
         });
     });
