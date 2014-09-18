@@ -1,0 +1,29 @@
+Fork collections, make it not modify any built-in prototypes.
+iterator.js:345
+  shimming StopIteration by modifying Object.prototype.toString?
+  not allowed!!
+array-changes.js:30
+  making arrays observable
+  one trick uses __proto__ substitution
+  the other is...
+  Should I use a similar trick in the implementation of ShimArray?
+  
+  defineProperty(Array.prototype, 
+
+Object.create
+  Can I use this?  Should I use a polyfill?
+Object.freeze
+  Can I use this?  Do we require a browser that implements freeze?
+
+Copy static Array methods onto ShimArray
+Copy static Object methods onto ShimObject
+
+Implement ShimArray.prototype.concat()
+  - mimic native concat() behavior
+  - return a ShimArray, not an Array
+
+Whenever you are:
+  - Invoking a method on a collection
+  - the collection might be an Array
+  - the method is added by collections.js
+You must check if the method is not on the object, then do a `ShimArray.prototype.method.(apply|call)`
